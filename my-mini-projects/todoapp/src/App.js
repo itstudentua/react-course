@@ -1,48 +1,57 @@
 //https://www.youtube.com/watch?v=QdTHUv79EZc&ab_channel=CodingWithDawid
 
-import './index.css';
-import TaskForm from "./TaskForm";
-import Task from "./Task";
-import {useEffect, useState} from "react";
 
-function App() {
-  const [tasks,setTasks] = useState([]);
 
-  useEffect(() => {
-    if (tasks.length === 0) return;
-    localStorage.setItem('tasks', JSON.stringify(tasks));
-  }, [tasks]);
+import "./index.css";
+import { useEffect, useState } from "react";
+
+export default function App() {
+
+  const [task, setTask] = useState([]);
+  const [addTask, setAddTask] = useState('');
 
   useEffect(() => {
-    const tasks = JSON.parse(localStorage.getItem('tasks'));
-    setTasks(tasks || []);
+    if (task.length === 0) return;
+    localStorage.setItem('task', JSON.stringify(task));
+  }, [task]);
+
+  useEffect(() => {
+    const task = JSON.parse(localStorage.getItem('task'));
+    setTask(task || []);
   }, []);
 
-  function addTask(name) {
-    setTasks(prev => {
-      return [...prev, {name:name,done:false}];
+  function handleSubmit(e) {
+    e.preventDefault();
+    addTask !== '' && setTask([...task, { text: addTask, done: false }]);
+    setAddTask('');
+  }
+
+  function handleDelete(id) {
+    setTask(prev => {
+      const newArr = prev.filter((taskObject, index) => index !== id);
+      return newArr;
     });
   }
 
-  function removeTask(indexToRemove) {
-    setTasks(prev => {
-      return prev.filter((taskObject, index) => index !== indexToRemove);
+
+  function handleEdit(ind, name) {
+    setTask((prev) => {
+      const newArr = [...prev];
+      newArr[ind].text = name;
+      return newArr;
     });
   }
 
-  function updateTaskDone(taskIndex, newDone) {
-    setTasks(prev => {
-      const newTasks = [...prev];
-      newTasks[taskIndex].done = newDone;
-      return newTasks;
+  function handleCheckboxChange(done, ind) {
+    setTask(prev => {
+      const newArr = [...prev];
+      newArr[ind].done = done;
+      return newArr;
     });
   }
-
-  const numberComplete = tasks.filter(t => t.done).length;
-  const numberTotal = tasks.length;
 
   function getMessage() {
-    const percentage = numberComplete/numberTotal * 100;
+    const percentage = numberComplete / numberTotal * 100;
     if (percentage === 0) {
       return 'Try to do at least one! 🙏';
     }
@@ -52,27 +61,51 @@ function App() {
     return 'Keep it going 💪🏻';
   }
 
-  function renameTask(index,newName) {
-    setTasks(prev => {
-      const newTasks = [...prev];
-      newTasks[index].name = newName;
-      return newTasks;
-    })
-  }
+
+  const numberComplete = task.filter(t => t.done).length;
+  const numberTotal = task.length;
 
   return (
     <main>
-      <h1>{numberComplete}/{numberTotal} Complete</h1>
-      <h2>{getMessage()}</h2>
-      <TaskForm onAdd={addTask} />
-      {tasks.map((task,index) => (
-        <Task {...task}
-              onRename={newName => renameTask(index,newName)}
-              onTrash={() => removeTask(index)}
-              onToggle={done => updateTaskDone(index, done)} />
-      ))}
+      <h1>Todo Application</h1>
+      <h2>{numberComplete}/{numberTotal} Complete</h2>
+      <h3>{getMessage()}</h3>
+
+      <form onSubmit={handleSubmit}>
+        <button>+</button>
+        <input type="text" placeholder="Enter task ..." value={addTask} onChange={(e) => setAddTask(e.target.value)} />
+      </form>
+
+      <ul>
+        {
+          task.map((item, ind) =>
+            <Task
+              handleCheckboxChange={(done) => handleCheckboxChange(done, ind)}
+              done={item.done}
+              handleEdit={(name) => handleEdit(ind, name)}
+              handleDelete={() => handleDelete(ind)}
+              key={ind}>
+              {item.text}
+            </Task>
+          )
+        }
+      </ul>
     </main>
   );
 }
 
-export default App;
+function Task({ handleCheckboxChange, handleDelete, done, handleEdit, children }) {
+  const [editMode, setEditMode] = useState(false);
+
+  return (
+    <li>
+      <input className={done ? 'checked' : ''} onChange={() => handleCheckboxChange(!done)} checked={done} type="checkbox" />
+      {!editMode ? <p className={done ? 'checked' : ''} onClick={() => setEditMode(!editMode)} >{children}</p> :
+        <form onSubmit={ev => { ev.preventDefault(); setEditMode(false); }}>
+          <input type="text" value={children} onChange={e => handleEdit(e.target.value)} />
+        </form>
+      }
+      <button onClick={handleDelete}>x</button>
+    </li>
+  );
+}
