@@ -58,7 +58,7 @@ export default function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [query, setQuery] = useState("dark");
-  const [selectedId, setSelectedId] = useState("tt0468569");
+  const [selectedId, setSelectedId] = useState("");
 
   function handleSelectMovie(id) {
     setSelectedId(selectedId => id === selectedId ? null : id);
@@ -77,17 +77,29 @@ export default function App() {
   }
 
   useEffect(function () {
+    const controller = new AbortController();
+
     async function fetchMovies() {
       try {
         setIsLoading(true);
         setError("");
-        const res = await fetch(`http://www.omdbapi.com/?apikey=${KEY}&s=${query}`);
-        if (!res.ok) throw new Error("Something went wrong with fetching movies");
+        const res = await fetch(
+          `http://www.omdbapi.com/?apikey=${KEY}&s=${query}`,
+          { signal: controller.signal }
+        );
+
+        if (!res.ok)
+          throw new Error("Something went wrong with fetching movies");
+
         const data = await res.json();
         if (data.Response === "False") throw new Error("Movie not found");
+
         setMovies(data.Search);
+        setError("");
       } catch (err) {
-        setError(err.message);
+        if (err.name !== "AbortError") {
+          setError(err.message);
+        }
       }
       finally {
         setIsLoading(false);
@@ -98,7 +110,13 @@ export default function App() {
       setError("");
       return;
     }
+
+    handleCloseMovie();
     fetchMovies();
+
+    return function () {
+      controller.abort();
+    }
   }, [query]);
 
   return (
@@ -118,7 +136,7 @@ export default function App() {
         <Box>
           <>
             {
-              selectedId ? <MovieDeatails watched={watched} onCloseMovie={handleCloseMovie} selectedId={selectedId} onAddWatched={handleAddWatched} /> :
+              selectedId ? <MovieDetails watched={watched} onCloseMovie={handleCloseMovie} selectedId={selectedId} onAddWatched={handleAddWatched} /> :
                 <>
                   <WatchedSummary watched={watched} />
                   <WatchedMovieList onDeleteWatched={handleDeleteWatched} watched={watched} />
@@ -259,7 +277,7 @@ function Movie({ movie, onSelectMovie }) {
   );
 }
 
-function MovieDeatails({ selectedId, onCloseMovie, onAddWatched, watched }) {
+function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
   const [movie, setMovie] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [userRating, setUserRating] = useState('');
@@ -300,6 +318,19 @@ function MovieDeatails({ selectedId, onCloseMovie, onAddWatched, watched }) {
     }
 
   }, [title]);
+
+  useEffect(function () {
+    function callback (e) {
+      if (e.code === "Escape") {
+        onCloseMovie();
+      }
+    }
+    document.addEventListener('keydown', callback)
+
+    return function() {
+      document.removeEventListener('keydown', callback)
+    }
+  }, [onCloseMovie]);
 
   function handleAdd() {
     const newWatchedMovie = {
