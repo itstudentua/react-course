@@ -54,15 +54,11 @@ const KEY = '8c813f51';
 
 export default function App() {
   const [movies, setMovies] = useState([]);
+  const [watched, setWatched] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [query, setQuery] = useState("dark");
   const [selectedId, setSelectedId] = useState("");
-  //  const [watched, setWatched] = useState([]);
-  const [watched, setWatched] = useState(function(){
-    const storedValue = localStorage.getItem("watched");
-    return JSON.parse(storedValue);
-  });
 
   function handleSelectMovie(id) {
     setSelectedId(selectedId => id === selectedId ? null : id);
@@ -79,12 +75,6 @@ export default function App() {
   function handleDeleteWatched(id) {
     setWatched((watched) => watched.filter(el => el.imdbID !== id))
   }
-
-
-  useEffect(function () {
-    localStorage.setItem("watched", JSON.stringify(watched));
-  }, [watched])
-
 
   useEffect(function () {
     const controller = new AbortController();
@@ -330,14 +320,14 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
   }, [title]);
 
   useEffect(function () {
-    function callback(e) {
+    function callback (e) {
       if (e.code === "Escape") {
         onCloseMovie();
       }
     }
     document.addEventListener('keydown', callback)
 
-    return function () {
+    return function() {
       document.removeEventListener('keydown', callback)
     }
   }, [onCloseMovie]);
