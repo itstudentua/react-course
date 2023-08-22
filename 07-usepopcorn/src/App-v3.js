@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import StarRating from "./StarRating"
 import { useMovies } from "./useMovies";
 import { useLocalStorageState } from "./useLocalStorageState";
-import { useKey } from "./useKey";
 const tempMovieData = [
   {
     imdbID: "tt1375666",
@@ -166,13 +165,20 @@ function Search({ query, setQuery }) {
 
   const inputEl = useRef(null);
 
-  useKey("Enter", function() {
-    if (document.activeElement === inputEl.current) {
-      return;
+  useEffect(function () {
+
+    function callBack(e) {
+      if (document.activeElement === inputEl.current) {
+        return;
+      }
+      if (e.code === "Enter") {
+        inputEl.current.focus();
+        setQuery("");
+      }
     }
-    inputEl.current.focus();
-    setQuery("");
-  });
+    document.addEventListener("keydown", callBack);
+    return () => document.addEventListener("keydown", callBack);
+  }, [setQuery]);
 
   return (
     <input
@@ -308,8 +314,18 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
 
   }, [title]);
 
-  useKey("Escape", onCloseMovie);
+  useEffect(function () {
+    function callback(e) {
+      if (e.code === "Escape") {
+        onCloseMovie();
+      }
+    }
+    document.addEventListener('keydown', callback)
 
+    return function () {
+      document.removeEventListener('keydown', callback)
+    }
+  }, [onCloseMovie]);
 
   function handleAdd() {
     const newWatchedMovie = {
