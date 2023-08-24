@@ -86,11 +86,6 @@ export default function App() {
     setWatched((watched) => watched.filter(el => el.imdbID !== id))
   }
 
-
-
-
- 
-
   return (
     <>
       <NavBar >
