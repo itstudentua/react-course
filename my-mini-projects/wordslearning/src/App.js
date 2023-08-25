@@ -38,6 +38,7 @@ function App() {
   function handleDataButtonClick() {
     setIsMyData(myData => !myData);
     setIsNewData(false);
+
   }
 
   function handleCloseTableButtonClick() {
@@ -48,9 +49,16 @@ function App() {
     setIsNewData(myData => !myData);
   }
 
+  function handleHeaderClick() {
+    setIsMyData(false);
+    setIsNewData(false);
+    setUserWords("");
+    setWordsInfo([0, 0, 0]);
+  }
+
   return (
     <>
-      <Header onClickMyData={handleDataButtonClick} isMyData={isMyData} />
+      <Header onClickHeader={handleHeaderClick} onClickMyData={handleDataButtonClick} isMyData={isMyData} />
       <Main
         googleWords={googleWords}
         onDonwloadExcel={handleDownloadExcel}
@@ -68,11 +76,11 @@ function App() {
   );
 }
 
-function Header({ onClickMyData, isMyData }) {
+function Header({ onClickHeader, onClickMyData, isMyData }) {
   return (
     <header>
       <div className="header__container">
-        <h1><span className="header__link_mob">WL</span><span className="header__link">Words Learning</span></h1>
+        <h1 onClick={onClickHeader}><span className="header__link_mob">WL</span><span className="header__link">Words Learning</span></h1>
         <Button onClickButton={onClickMyData}>{!isMyData ? "My Data" : "New Data"}</Button>
       </div>
     </header>
@@ -81,7 +89,7 @@ function Header({ onClickMyData, isMyData }) {
 }
 
 function Main({ onClickCloseTable, userWords, onClickShowTable, isNewData, isMyData, googleWords, processWords, onUserWords, wordsInfo, onDonwloadExcel, children }) {
-  
+
   const copyArray = () => {
     setCopied(true); // Устанавливаем состояние "copied" в true после копирования
     setTimeout(() => setCopied(false), 1000); // Через 3 секунды снова устанавливаем в false
@@ -100,11 +108,11 @@ function Main({ onClickCloseTable, userWords, onClickShowTable, isNewData, isMyD
           {
             wordsInfo[0] > 0 &&
             <div className="words_info">
-            <CopyToClipboard text={wordsInfo[2].join("\n")} onCopy={copyArray}>
-            <img onClick={copyArray} src="../copy.svg" alt="SVG Example" />
+              <CopyToClipboard text={wordsInfo[2].join("\n")} onCopy={copyArray}>
+                <img onClick={copyArray} src="../copy.svg" alt="SVG Example" />
 
-      </CopyToClipboard>
-            {copied && <p style={{fontStyle: "italic"}}>Text copied!</p>}
+              </CopyToClipboard>
+              {copied && <p style={{ fontStyle: "italic" }}>Text copied!</p>}
 
               <p>Total words: {wordsInfo[0]}</p>
               <p>Unique words: {wordsInfo[1]}</p>
