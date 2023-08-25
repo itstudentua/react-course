@@ -1,69 +1,174 @@
-import { useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useGoogleSheet } from "./GoogleSheet"
 import { splitStringFunc, makeUniq, uniqueElementsNotInFirst } from "./wordsProcessing";
 import { generateExcel } from "./generateExcel";
 
 function App() {
 
-  const { googleWords, isLoading, error } = useGoogleSheet();
+  const { googleWords } = useGoogleSheet();
   const [userWords, setUserWords] = useState("");
   const [wordsInfo, setWordsInfo] = useState([0, 0, 0]);
+  const [isMyData, setIsMyData] = useState(false);
+  const [isNewData, setIsNewData] = useState(false);
 
+  useEffect(() => {
+    document.title = `Words Learning ${(isMyData ? "| My data" : "") || (isNewData ? "| New data" : "")}`;
+  });
 
-  function processWords() {
+  const processWords = useCallback(() => {
     const tempArr = splitStringFunc(userWords);
     const userWordsArr = makeUniq(tempArr);
-    const resultArray = uniqueElementsNotInFirst(googleWords, userWordsArr)
+    const googleWordsNew = googleWords.map((item) => item.split(",")[0]);
+    const resultArray = uniqueElementsNotInFirst(googleWordsNew, userWordsArr)
+    console.log(resultArray);
 
     setWordsInfo([tempArr.length, userWordsArr.length, resultArray]);
-    console.log(resultArray);
-  }
+  }, [userWords, googleWords]);
+
+
+  useEffect(() => processWords(), [processWords, userWords]);
+
 
   function handleDownloadExcel() {
     generateExcel(wordsInfo[2]);
   }
 
+  function handleDataButtonClick() {
+    setIsMyData(myData => !myData);
+    setIsNewData(false);
+  }
+
+  function handleCloseTableButtonClick() {
+    setIsNewData(myData => !myData);
+  }
+
+  function handleShowTableButtonClick() {
+    setIsNewData(myData => !myData);
+  }
+
   return (
     <>
-      <Header />
-      {googleWords.length === 0 && <span>Loading...</span>}
-      {!isLoading && googleWords.length > 0 && <Main onDonwloadExcel={handleDownloadExcel} wordsInfo={wordsInfo} onUserWords={setUserWords} processWords={processWords} />}
-      {error === "" && <p>{error}</p>}
+      <Header onClickMyData={handleDataButtonClick} isMyData={isMyData} />
+      <Main
+        googleWords={googleWords}
+        onDonwloadExcel={handleDownloadExcel}
+        wordsInfo={wordsInfo}
+        userWords={userWords}
+        onUserWords={setUserWords}
+        processWords={processWords}
+        isMyData={isMyData}
+        onClickShowTable={handleShowTableButtonClick}
+        isNewData={isNewData}
+        onClickCloseTable={handleCloseTableButtonClick}
+      >
+      </Main>
     </>
   );
 }
 
-function Header() {
+function Header({ onClickMyData, isMyData }) {
   return (
     <header>
-      <span className="header__link" >Words Learning</span>
+      <div className="header__container">
+        <h1><span className="header__link_mob">WL</span><span className="header__link">Words Learning</span></h1>
+        <Button onClickButton={onClickMyData}>{!isMyData ? "My Data" : "New Data"}</Button>
+      </div>
     </header>
 
   );
 }
 
-function Main({ processWords, onUserWords, wordsInfo, onDonwloadExcel }) {
+function Main({ onClickCloseTable, userWords, onClickShowTable, isNewData, isMyData, googleWords, processWords, onUserWords, wordsInfo, onDonwloadExcel, children }) {
+
+  
+  return (
+    <main>
+      {googleWords.length === 0 && <span className="preloader">Loading...</span>}
+      {!isNewData && !isMyData && googleWords.length > 0 ?
+        <>
+          <TextArea onUserWords={onUserWords} userWords={userWords} processWords={processWords} />
+          {
+            wordsInfo[0] > 0 &&
+            <div className="words_info">
+              <p>Total words: {wordsInfo[0]}</p>
+              <p>Unique words: {wordsInfo[1]}</p>
+              <p>New words: {wordsInfo[2].length}</p>
+              {wordsInfo[2].length > 0 &&
+                <div style={{ display: "flex", gap: "20px" }}>
+                  <Button onClickButton={onClickShowTable}>Show table</Button>
+                  <Button onClickButton={onDonwloadExcel}>Download Excel</Button>
+                </div>
+              }
+            </div>
+          }
+        </> :
+        <>
+          {isMyData && <Table data={googleWords} />}
+          {isNewData &&
+            <>
+              <Table data={wordsInfo[2]} isNewData={isNewData} />
+              <div style={{ display: "flex", gap: "20px" }}>
+                <Button onClickButton={onClickCloseTable}>Close table</Button>
+                <Button onClickButton={onDonwloadExcel}>Download Excel</Button>
+              </div>
+            </>
+          }
+
+        </>
+      }
+      {children}
+    </main>
+  );
+}
+
+function Button({ onClickButton, children }) {
+  function handleClick() {
+    onClickButton();
+  }
+  return (
+    <button onClick={handleClick} className="main__button">{children}</button>
+  );
+}
+
+function TextArea({ onUserWords, userWords }) {
 
 
   return (
-    <main>
-      <textarea
-        className="main__input"
-        type="text"
-        placeholder="This is the New Words section. In this field you can enter the text you want to process."
-        onChange={e => onUserWords(e.target.value)}
-      />
-      <button onClick={processWords} className="processBtn">Process</button>
-      {
-        wordsInfo[0] > 0  &&
-        <div className="words_info">
-          <p>Total words: {wordsInfo[0]}</p>
-          <p>Unique words: {wordsInfo[1]}</p>
-          <p>New words: {wordsInfo[2].length}</p>
-          {wordsInfo[2].length > 0 && <button onClick={onDonwloadExcel} className="processBtn">Download Excel</button>}
-        </div>
-      }
-    </main>
+    <textarea
+      className="main__input"
+      type="text"
+      placeholder="This is the New Words section. In this field you can enter the text you want to process."
+      value={userWords}
+      onChange={e => onUserWords(e.target.value)}
+    />
+  );
+}
+
+function Table({ data, isNewData = false }) {
+  return (
+    <div className="table__container_out">
+      <div className="table__container">
+        <table>
+          <thead>
+            <tr>
+              <th>№</th>
+              <th>Word</th>
+              {!isNewData && <th>Translate</th>}
+            </tr>
+          </thead>
+          <tbody>
+            {data.map((item, index) => (
+              <tr key={index}>
+                <td>{index + 1}</td>
+                <td>{item.split(',')[0]}</td>
+                {!isNewData && <td>{item.split(",")[1]}</td>}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
   );
 }
 

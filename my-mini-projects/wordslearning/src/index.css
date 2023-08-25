@@ -23,10 +23,10 @@ body {
     min-width: 300px;
 }
 
-@media(max-width: 500px) {
-  body {
-    padding: 0 30px;
-  }
+@media (max-width: 500px) {
+    body {
+        padding: 0 30px;
+    }
 }
 
 code {
@@ -42,35 +42,54 @@ code {
 }
 
 header {
+    margin-top: 30px;
+    width: 100%;
+}
+
+.header__container {
     margin: auto;
     max-width: 1200px;
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
     align-items: center;
-    padding: 20px 0;
-    margin-top: 30px;
+    gap: 50px;
 }
 
 .header__link {
-    font-size: 3em;
+    font-size: 2em;
     font-weight: bold;
     cursor: pointer;
     transition: all 0.3s ease;
+    display: block;
 }
 
-.header__link:hover {
+.header__link_mob {
+    display: none;
+}
+
+h1:hover {
     color: #3a3a3a;
     transition: all 0.3s ease;
 }
 
+
+.preloader {
+    color: #3a3a3a;
+    font-size: 2.5em;
+    font-weight: bolder;
+}
+
 main {
-    margin-top: 20px;
+    margin-top: 100px;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     width: 100%;
+    padding-bottom: 20px;
 }
+
+
 
 .main__input {
     transition: all 0.5s ease-out;
@@ -86,22 +105,25 @@ main {
     width: 100%;
     max-width: 800px;
     height: 400px;
+    margin-bottom: 15px;
 }
 
 .main__input::placeholder {
     color: #878686;
 }
 
-.main__input::-webkit-scrollbar, .main__input::-webkit-scrollbar{
+.main__input::-webkit-scrollbar,
+.table__container::-webkit-scrollbar {
     width: 0; /* Скрываем стандартный скроллбар WebKit (Chrome, Safari, Opera) */
 }
 
 /* Добавьте стили для скроллбара для других браузеров (Firefox, Edge) */
-.main__input::-moz-scrollbar, .main__input::-moz-scrollbar {
+.main__input::-moz-scrollbar,
+.table__container::-moz-scrollbar {
     width: 0;
 }
 
-.processBtn {
+.main__button {
     text-align: center;
     outline: none;
     border: none;
@@ -110,19 +132,18 @@ main {
     align-items: center;
     border-radius: 4px;
     font-size: 14px;
-    width: 100px;
+    width: auto;
     font-weight: 600;
-    color: #fff;
+    color: #aaaaaa;
     font-size: 14px;
     padding: 10px 12px;
     background-color: #3a3a3a;
     box-shadow: 0px 0px 2px rgba(0, 0, 0, 0.25);
     transition: all 0.5s ease-out;
-    margin-top: 15px;
 }
 
-.processBtn:hover {
-  opacity: 0.5;
+.main__button:hover {
+    opacity: 0.5;
 }
 
 .words_info {
@@ -134,6 +155,89 @@ main {
     justify-content: center;
 }
 
-.words_info button {
-    width: auto;
+.table__container_out {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 50px;
+    -webkit-appearance: none;
+
+}
+
+.table__container {
+    max-width: 700px;
+    max-height: 70vh; /* Здесь вы можете задать желаемую высоту контейнера */
+    position: relative;
+    overflow-y: auto;
+    border: 1px solid #3a3a3a;
+    -webkit-appearance: none;
+
+}
+
+tbody {
+    max-height: 380px;
+    -webkit-appearance: none;
+
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    border: 1px solid #3a3a3a;
+    -webkit-appearance: none;
+
+}
+
+th,
+td {
+    border: 1px solid #3a3a3a;
+    padding: 8px;
+    text-align: left;
+    -webkit-appearance: none;
+
+}
+
+thead tr {
+    -webkit-appearance: none;
+
+    position: -webkit-sticky;
+    position: -moz-sticky;
+    position: -ms-sticky;
+    position: -o-sticky;
+    position: sticky;
+    top: 0;
+    background-color: #212121;
+    top: 0px;
+    z-index: 10;
+    -webkit-box-shadow: 0px 5px 5px rgba(0, 0, 0, 0.2), 0px -5px 5px #3a3a3a;
+    -moz-box-shadow: 0px 5px 5px rgba(0, 0, 0, 0.2), 0px -5px 5px #3a3a3a;
+    box-shadow: 0px 5px 5px rgba(0, 0, 0, 0.2), 0px -5px 5px #3a3a3a;
+
+    border-top: 1px solid #fff;
+}
+
+
+@media (max-width: 500px) {
+    
+    .header__link_mob{
+        display: block;
+    }
+
+    .header__link {
+        display: none;
+    }
+
+    main {
+        margin-top: 50px;
+    }
+
+    .table__container {
+        max-height: 55vh;
+    }
+
+    .main__input {
+        border-radius: 20px;
+    }
+
 }
