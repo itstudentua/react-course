@@ -2,6 +2,8 @@ import { useEffect, useState, useCallback } from "react";
 import { useGoogleSheet } from "./GoogleSheet"
 import { splitStringFunc, makeUniq, uniqueElementsNotInFirst } from "./wordsProcessing";
 import { generateExcel } from "./generateExcel";
+import CopyToClipboard from 'react-copy-to-clipboard';
+
 
 function App() {
 
@@ -79,17 +81,31 @@ function Header({ onClickMyData, isMyData }) {
 }
 
 function Main({ onClickCloseTable, userWords, onClickShowTable, isNewData, isMyData, googleWords, processWords, onUserWords, wordsInfo, onDonwloadExcel, children }) {
-
   
+  const copyArray = () => {
+    setCopied(true); // Устанавливаем состояние "copied" в true после копирования
+    setTimeout(() => setCopied(false), 1000); // Через 3 секунды снова устанавливаем в false
+  };
+
+  const [copied, setCopied] = useState(false);
+
+
   return (
     <main>
       {googleWords.length === 0 && <span className="preloader">Loading...</span>}
       {!isNewData && !isMyData && googleWords.length > 0 ?
         <>
+
           <TextArea onUserWords={onUserWords} userWords={userWords} processWords={processWords} />
           {
             wordsInfo[0] > 0 &&
             <div className="words_info">
+            <CopyToClipboard text={wordsInfo[2].join("\n")} onCopy={copyArray}>
+            <img onClick={copyArray} src="../copy.svg" alt="SVG Example" />
+
+      </CopyToClipboard>
+            {copied && <p style={{fontStyle: "italic"}}>Text copied!</p>}
+
               <p>Total words: {wordsInfo[0]}</p>
               <p>Unique words: {wordsInfo[1]}</p>
               <p>New words: {wordsInfo[2].length}</p>
@@ -107,7 +123,8 @@ function Main({ onClickCloseTable, userWords, onClickShowTable, isNewData, isMyD
           {isNewData &&
             <>
               <Table data={wordsInfo[2]} isNewData={isNewData} />
-              <div style={{ display: "flex", gap: "20px" }}>
+              <p>Total words: {wordsInfo[2].length}</p>
+              <div style={{ display: "flex", gap: "20px", marginTop: "25px" }}>
                 <Button onClickButton={onClickCloseTable}>Close table</Button>
                 <Button onClickButton={onDonwloadExcel}>Download Excel</Button>
               </div>

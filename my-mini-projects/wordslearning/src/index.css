@@ -89,7 +89,13 @@ main {
     padding-bottom: 20px;
 }
 
-
+img {
+    right: 0;
+    top: 0;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
 
 .main__input {
     transition: all 0.5s ease-out;
@@ -106,6 +112,8 @@ main {
     max-width: 800px;
     height: 400px;
     margin-bottom: 15px;
+    position: relative;
+
 }
 
 .main__input::placeholder {
@@ -160,14 +168,14 @@ main {
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 50px;
+    margin-bottom: 20px;
     -webkit-appearance: none;
 
 }
 
 .table__container {
     max-width: 700px;
-    max-height: 70vh; /* Здесь вы можете задать желаемую высоту контейнера */
+    max-height: 50vh; /* Здесь вы можете задать желаемую высоту контейнера */
     position: relative;
     overflow-y: auto;
     border: 1px solid #3a3a3a;
