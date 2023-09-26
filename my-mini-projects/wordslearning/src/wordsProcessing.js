@@ -1,5 +1,5 @@
 function wordsMorphology(wordsString) {
-    const exclusionList = `us as thus yes Is Was Does Has His Its This Yours Hers News Means Series Analysis Lens famous`;
+    const exclusionList = `us as thus yes Is Was Does Has His This News Means Series Analysis Lens famous serious`;
     const vowelLetters = 'aeiou';
     return wordsString.map((el) => {
         // removing "'s" from words
